@@ -1,6 +1,5 @@
 .vscode
 __pycache__
-venv
 
 # OS generated files #
 ######################
@@ -12,4 +11,15 @@ venv
 ehthumbs.db
 Thumbs.db
 
-.idea/
+# IntelliJ IDEA files
+.idea/*
+!.idea/codeStyles/
+!.idea/modules.xml
+!.idea/vcs.xml
+**/*.iml
+
+# Python virtual environment
+venv
+
+# NodeJS downloaded dependencies
+/frontend/node_modules/
