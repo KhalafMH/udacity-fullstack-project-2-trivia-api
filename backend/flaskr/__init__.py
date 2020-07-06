@@ -32,18 +32,33 @@ def create_app(test_config=None):
         categories = Category.query.all()
         return jsonify(categories)
 
-    '''
-    @TODO: 
-    Create an endpoint to handle GET requests for questions, 
-    including pagination (every 10 questions). 
-    This endpoint should return a list of questions, 
-    number of total questions, current category, categories. 
-  
-    TEST: At this point, when you start the application
-    you should see questions and categories generated,
-    ten questions per page and pagination at the bottom of the screen for three pages.
-    Clicking on the page numbers should update the questions. 
-    '''
+    @app.route('/api/questions')
+    def get_questions():
+        """
+        Returns paged questions
+        """
+
+        def map_question(question):
+            return {
+                'id': question.id,
+                'question': question.question,
+                'answer': question.answer,
+                'category': question.category,
+                'difficulty': question.difficulty
+            }
+
+        page = int(request.args.get('page'))
+        questions: list = Question.query.all()
+        start = 10 * (page - 1)
+        end = 10 * page
+        page_questions = questions[start:end]
+        result = {
+            "questions": list(map(lambda x: map_question(x), page_questions)),
+            "total_questions": len(questions),
+            "categories": list(map(lambda x: x.category, page_questions)),
+            "current_category": None
+        }
+        return jsonify(result)
 
     '''
     @TODO: 
