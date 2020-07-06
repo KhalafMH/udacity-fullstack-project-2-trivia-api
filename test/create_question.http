@@ -1,0 +1,9 @@
+POST http://localhost:5000/api/questions/new
+Content-Type: application/json
+
+{
+  "question": "What is the answer to everything",
+  "answer": "42",
+  "difficulty": "3",
+  "category": 1
+}

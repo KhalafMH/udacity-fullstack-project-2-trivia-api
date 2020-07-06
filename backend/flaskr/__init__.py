@@ -1,4 +1,6 @@
 import os
+from http.client import OK
+
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -12,7 +14,7 @@ QUESTIONS_PER_PAGE = 10
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__)
-    setup_db(app)
+    db = setup_db(app)
 
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
@@ -58,16 +60,22 @@ def create_app(test_config=None):
     This removal will persist in the database and when you refresh the page. 
     '''
 
-    '''
-    @TODO: 
-    Create an endpoint to POST a new question, 
-    which will require the question and answer text, 
-    category, and difficulty score.
-  
-    TEST: When you submit a question on the "Add" tab, 
-    the form will clear and the question will appear at the end of the last page
-    of the questions list in the "List" tab.  
-    '''
+    @app.route('/api/questions/new', methods=['POST'])
+    def create_question():
+        """
+        Creates a new question
+        """
+        question_text = request.json['question']
+        answer = request.json['answer']
+        difficulty = request.json['difficulty']
+        category = request.json['category']
+
+        question_object = Question(question_text, answer, category, difficulty)
+        db.session.add(question_object)
+        db.session.commit()
+        return jsonify({
+            "result": "success"
+        })
 
     @app.route('/api/questions', methods=['POST'])
     def search_questions():
