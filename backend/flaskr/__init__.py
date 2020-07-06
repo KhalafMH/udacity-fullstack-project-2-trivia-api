@@ -29,8 +29,7 @@ def create_app(test_config=None):
         Returns all available categories.
         """
 
-        categories = Category.query.all()
-        return jsonify(list(map(lambda x: x.type, categories)))
+        return jsonify(_read_all_categories())
 
     @app.route('/api/questions')
     def get_questions():
@@ -46,7 +45,7 @@ def create_app(test_config=None):
         result = {
             "questions": list(map(lambda x: _map_question(x), page_questions)),
             "total_questions": len(questions),
-            "categories": list(map(lambda x: x.category, page_questions)),
+            "categories": _read_all_categories(),
             "current_category": None
         }
         return jsonify(result)
@@ -92,7 +91,7 @@ def create_app(test_config=None):
         return jsonify({
             "questions": list(map(lambda x: _map_question(x), questions_by_category)),
             "total_questions": len(questions_by_category),
-            "current_category": _get_category(id),
+            "current_category": _read_category(id),
         })
 
     '''
@@ -121,11 +120,16 @@ def _map_question(question):
         'id': question.id,
         'question': question.question,
         'answer': question.answer,
-        'category': _get_category(question.category),
+        'category': _read_category(question.category),
         'difficulty': question.difficulty
     }
 
 
-def _get_category(id):
+def _read_category(id):
     current_category_object = Category.query.get(id)
     return current_category_object.type if current_category_object is not None else None
+
+
+def _read_all_categories():
+    categories = Category.query.all()
+    return list(map(lambda x: x.type, categories))
