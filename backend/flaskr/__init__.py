@@ -28,7 +28,6 @@ def create_app(test_config=None):
         """
         Returns all available categories.
         """
-
         return jsonify(_read_all_categories())
 
     @app.route('/api/questions')
@@ -36,7 +35,6 @@ def create_app(test_config=None):
         """
         Returns paged questions
         """
-
         page = int(request.args.get('page'))
         questions: list = Question.query.all()
         start = 10 * (page - 1)
@@ -69,25 +67,25 @@ def create_app(test_config=None):
     of the questions list in the "List" tab.  
     '''
 
-    '''
-    @TODO: 
-    Create a POST endpoint to get questions based on a search term. 
-    It should return any questions for whom the search term 
-    is a substring of the question. 
-  
-    TEST: Search by any phrase. The questions list will update to include 
-    only question that include that string within their question. 
-    Try using the word "title" to start. 
-    '''
+    @app.route('/api/questions', methods=['POST'])
+    def search_questions():
+        """
+        Returns case insensitive matches for a search term
+        """
+        search_term = request.json['searchTerm']
+        questions = Question.query.filter(Question.question.ilike(f"%{search_term}%")).all()
+        return jsonify({
+            "questions": list(map(lambda x: _map_question(x), questions)),
+            "total_questions": len(questions),
+            "current_category": None
+        })
 
     @app.route('/api/categories/<id>/questions')
     def get_questions_by_category(id):
         """
         Get all questions filtered by a category
         """
-
         questions_by_category = Question.query.filter(Question.category == id).all()
-        print(f"questions by category: {questions_by_category}")
         return jsonify({
             "questions": list(map(lambda x: _map_question(x), questions_by_category)),
             "total_questions": len(questions_by_category),
