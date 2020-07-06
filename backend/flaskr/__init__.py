@@ -28,7 +28,9 @@ def create_app(test_config=None):
         """
         Returns all available categories.
         """
-        return jsonify(_read_all_categories())
+        return jsonify({
+            "categories": _read_all_categories()
+        })
 
     @app.route('/api/questions')
     def get_questions():
