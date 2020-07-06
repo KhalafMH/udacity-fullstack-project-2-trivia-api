@@ -38,22 +38,13 @@ def create_app(test_config=None):
         Returns paged questions
         """
 
-        def map_question(question):
-            return {
-                'id': question.id,
-                'question': question.question,
-                'answer': question.answer,
-                'category': question.category,
-                'difficulty': question.difficulty
-            }
-
         page = int(request.args.get('page'))
         questions: list = Question.query.all()
         start = 10 * (page - 1)
         end = 10 * page
         page_questions = questions[start:end]
         result = {
-            "questions": list(map(lambda x: map_question(x), page_questions)),
+            "questions": list(map(lambda x: _map_question(x), page_questions)),
             "total_questions": len(questions),
             "categories": list(map(lambda x: x.category, page_questions)),
             "current_category": None
@@ -90,14 +81,19 @@ def create_app(test_config=None):
     Try using the word "title" to start. 
     '''
 
-    '''
-    @TODO: 
-    Create a GET endpoint to get questions based on category. 
-  
-    TEST: In the "List" tab / main screen, clicking on one of the 
-    categories in the left column will cause only questions of that 
-    category to be shown. 
-    '''
+    @app.route('/api/categories/<id>/questions')
+    def get_questions_by_category(id):
+        """
+        Get all questions filtered by a category
+        """
+
+        questions_by_category = Question.query.filter(Question.category == id).all()
+        print(f"questions by category: {questions_by_category}")
+        return jsonify({
+            "questions": list(map(lambda x: _map_question(x), questions_by_category)),
+            "total_questions": len(questions_by_category),
+            "current_category": _get_category(id),
+        })
 
     '''
     @TODO: 
@@ -118,3 +114,18 @@ def create_app(test_config=None):
     '''
 
     return app
+
+
+def _map_question(question):
+    return {
+        'id': question.id,
+        'question': question.question,
+        'answer': question.answer,
+        'category': _get_category(question.category),
+        'difficulty': question.difficulty
+    }
+
+
+def _get_category(id):
+    current_category_object = Category.query.get(id)
+    return current_category_object.type if current_category_object is not None else None
