@@ -30,7 +30,7 @@ def create_app(test_config=None):
         """
 
         categories = Category.query.all()
-        return jsonify(categories)
+        return jsonify(list(map(lambda x: x.type, categories)))
 
     @app.route('/api/questions')
     def get_questions():
