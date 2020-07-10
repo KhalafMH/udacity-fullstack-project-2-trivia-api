@@ -1,0 +1,7 @@
+POST http://localhost:5000/api/quizzes
+Content-Type: application/json
+
+{
+  "previous_questions": [27],
+  "quiz_category": "Science"
+}
