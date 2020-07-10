@@ -1,6 +1,3 @@
-import os
-from http.client import OK
-
 from flask import Flask, request, abort, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
@@ -134,12 +131,29 @@ def create_app(test_config=None):
             "question": _map_question(questions[selection])
         })
 
+    @app.errorhandler(404)
+    def handle_404(error):
+        return jsonify({
+            "success": False,
+            "error": error.description,
+            "code": error.code,
+        }), error.code
 
-    '''
-    @TODO: 
-    Create error handlers for all expected errors 
-    including 404 and 422. 
-    '''
+    @app.errorhandler(422)
+    def handle_422(error):
+        return jsonify({
+            "success": False,
+            "error": error.description,
+            "code": error.code,
+        }), error.code
+
+    @app.errorhandler(500)
+    def handle_500(error):
+        return jsonify({
+            "success": False,
+            "error": error.description,
+            "code": error.code,
+        }), error.code
 
     return app
 
