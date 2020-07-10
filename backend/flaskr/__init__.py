@@ -15,13 +15,11 @@ def create_app(test_config=None):
 
     CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-    '''
-    @TODO: Use the after_request decorator to set Access-Control-Allow
-    '''
+    @app.after_request
+    def set_access_control(response: app.response_class):
+        response.headers.add_header("Access-Control-Allow", True)
+        return response
 
-    '''
-    Returns all available categories.
-    '''
     @app.route("/api/categories")
     def get_all_categories():
         """
