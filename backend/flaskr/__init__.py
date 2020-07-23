@@ -73,7 +73,7 @@ def create_app(test_config=None):
         finally:
             db.session.close()
 
-    @app.route('/api/questions/new', methods=['POST'])
+    @app.route('/api/questions', methods=['POST'])
     def create_question():
         """
         Creates a new question
@@ -92,7 +92,7 @@ def create_app(test_config=None):
             "success": True
         }), 201
 
-    @app.route('/api/questions', methods=['POST'])
+    @app.route('/api/search/questions', methods=['POST'])
     def search_questions():
         """
         Returns case insensitive matches for a search term

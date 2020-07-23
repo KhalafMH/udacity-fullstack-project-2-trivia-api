@@ -111,7 +111,7 @@ class TriviaTestCase(unittest.TestCase):
             "category": "Science",
             "difficulty": 5
         }
-        result = client.post("/api/questions/new", json=json)
+        result = client.post("/api/questions", json=json)
         self.assertEqual(201, result.status_code)
         self.assertDictEqual({"success": True}, result.json)
         with self.app.app_context():
@@ -131,7 +131,7 @@ class TriviaTestCase(unittest.TestCase):
             "category": "Science",
             "difficulty": 5
         }
-        result = client.post("/api/questions/new", data=json)
+        result = client.post("/api/questions", data=json)
         self.assertEqual(400, result.status_code)
         self.assertIn(("success", False), result.json.items())
 
