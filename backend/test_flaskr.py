@@ -27,11 +27,11 @@ class TriviaTestCase(unittest.TestCase):
                 INSERT INTO categories (id, type) VALUES (1, 'Science'), (2, 'Sport');
             """)
             self.db.engine.execute("""
-                INSERT INTO questions (id, question, answer, difficulty, category) 
-                VALUES (1, 'What is the answer to everything', '42', 3, 1);
+                INSERT INTO questions (question, answer, difficulty, category) 
+                VALUES ('What is the answer to everything', '42', 3, 1);
 
-                INSERT INTO questions (id, question, answer, difficulty, category) 
-                VALUES (2, 'When did the big bang happen', 'When the universe was created', 3, 1);
+                INSERT INTO questions (question, answer, difficulty, category) 
+                VALUES ('When did the big bang happen', 'When the universe was created', 3, 1);
             """)
 
     def tearDown(self):
@@ -58,13 +58,16 @@ class TriviaTestCase(unittest.TestCase):
         result = client.get("/api/questions?page=1")
         self.assertEqual(200, result.status_code)
         question = {
-            "id": 1,
             "question": 'What is the answer to everything',
             "answer": '42',
             "difficulty": 3,
             "category": 'Science',
         }
-        self.assertIn(question, result.json['questions'])
+        try:
+            exists = next(q for q in result.json['questions'] if all(item in q.items() for item in question.items()))
+        except StopIteration as e:
+            self.fail("Expected question was not found in the results")
+        self.assertIsNotNone(exists)
 
     def test_get_questions_fails_when_page_is_not_specified(self):
         result = self.client().get('/api/questions')
@@ -76,9 +79,10 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_delete_question_succeeds(self):
         client = self.client()
-        id = 1
+        id = 100
         with self.app.app_context():
-            value = self.db.engine.execute(f"SELECT * FROM questions WHERE id={id}").first()
+            value = self.db.engine.execute(
+                f"INSERT INTO questions (id, question, answer, difficulty, category) VALUES ({id}, 'Question 100', 'Answer 100', 3, 1)")
             self.assertIsNotNone(value)
         result = client.delete(f"/api/questions/{id}")
         self.assertEqual(200, result.status_code)
