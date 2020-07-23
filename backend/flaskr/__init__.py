@@ -1,8 +1,7 @@
-from flask import Flask, request, abort, jsonify
-from flask_sqlalchemy import SQLAlchemy
-from flask_cors import CORS
 import random
 
+from flask import Flask, request, abort, jsonify
+from flask_cors import CORS
 from sqlalchemy.exc import SQLAlchemyError
 
 from models import setup_db, Question, Category
@@ -54,21 +53,21 @@ def create_app(test_config=None):
         }
         return jsonify(result)
 
-    @app.route('/api/questions/<id>', methods=['DELETE'])
-    def delete_question(id):
+    @app.route('/api/questions/<int:question_id>', methods=['DELETE'])
+    def delete_question(question_id):
         """
         DELETE question using a question ID.
         """
         try:
-            question = Question.query.get(id)
+            question = Question.query.get(question_id)
             if question is None:
                 abort(404)
-            result = question.delete()
+            question.delete()
             db.session.commit()
             return jsonify({
                 "success": True
             })
-        except SQLAlchemyError as e:
+        except SQLAlchemyError:
             db.session.rollback()
         finally:
             db.session.close()
@@ -106,17 +105,17 @@ def create_app(test_config=None):
             "current_category": None
         })
 
-    @app.route('/api/categories/<id>/questions')
-    def get_questions_by_category(id):
+    @app.route('/api/categories/<int:category_id>/questions')
+    def get_questions_by_category(category_id):
         """
         Get all questions filtered by a category
         """
-        questions_by_category = Question.query.filter(Question.category == id).all()
+        questions_by_category = Question.query.filter(Question.category == category_id).all()
         return jsonify({
             "success": True,
             "questions": list(map(lambda x: _map_question(x), questions_by_category)),
             "total_questions": len(questions_by_category),
-            "current_category": _read_category(id),
+            "current_category": _read_category(category_id),
         })
 
     @app.route('/api/quizzes', methods=['POST'])
@@ -189,8 +188,8 @@ def _map_question(question):
     }
 
 
-def _read_category(id):
-    current_category_object = Category.query.get(id)
+def _read_category(category_id):
+    current_category_object = Category.query.get(category_id)
     return current_category_object.type if current_category_object is not None else None
 
 
