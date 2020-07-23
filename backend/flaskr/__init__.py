@@ -3,6 +3,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 
+from sqlalchemy.exc import SQLAlchemyError
+
 from models import setup_db, Question, Category
 
 QUESTIONS_PER_PAGE = 10
@@ -58,12 +60,15 @@ def create_app(test_config=None):
         DELETE question using a question ID.
         """
         try:
-            Question.query.filter_by(id=id).delete()
+            question = Question.query.get(id)
+            if question is None:
+                abort(404)
+            result = question.delete()
             db.session.commit()
             return jsonify({
                 "success": True
             })
-        except:
+        except SQLAlchemyError as e:
             db.session.rollback()
         finally:
             db.session.close()
@@ -165,9 +170,9 @@ def create_app(test_config=None):
     def handle_500(error):
         return jsonify({
             "success": False,
-            "error": error.description,
-            "code": error.code,
-        }), error.code
+            "error": "Internal error",
+            "code": 500,
+        }), 500
 
     return app
 
