@@ -35,13 +35,10 @@ class TriviaTestCase(unittest.TestCase):
             """)
 
     def tearDown(self):
-        """Executed after reach test"""
+        """Executed after each test"""
         with self.app.app_context():
-            self.db.engine.execute("""
-                DELETE FROM categories;
-                DELETE FROM questions;
-            """)
-        pass
+            self.db.engine.execute("DELETE FROM questions")
+            self.db.engine.execute("DELETE FROM categories")
 
     """
     TODO
@@ -75,6 +72,29 @@ class TriviaTestCase(unittest.TestCase):
         all(self.assertIn(item, result.json.items()) for item in {
             "success": False,
             "code": 400,
+        }.items())
+
+    def test_delete_question_succeeds(self):
+        client = self.client()
+        id = 1
+        with self.app.app_context():
+            value = self.db.engine.execute(f"SELECT * FROM questions WHERE id={id}").first()
+            self.assertIsNotNone(value)
+        result = client.delete(f"/api/questions/{id}")
+        self.assertEqual(200, result.status_code)
+        self.assertEqual({"success": True}, result.json)
+        with self.app.app_context():
+            value = self.db.engine.execute(f"SELECT * FROM questions WHERE id={id}").first()
+            self.assertIsNone(value)
+
+    def test_delete_question_fails_when_passed_nonexistent_id(self):
+        client = self.client()
+        id = 500
+        result = client.delete(f"/api/questions/{id}")
+        self.assertEqual(404, result.status_code)
+        all(self.assertIn(item, result.json.items()) for item in {
+            "success": False,
+            "code": 404,
         }.items())
 
 
