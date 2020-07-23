@@ -35,7 +35,10 @@ def create_app(test_config=None):
         """
         Returns paged questions
         """
-        page = int(request.args.get('page'))
+        page_input = request.args.get('page')
+        if page_input is None:
+            abort(400)
+        page = int(page_input)
         questions: list = Question.query.all()
         start = 10 * (page - 1)
         end = 10 * page
