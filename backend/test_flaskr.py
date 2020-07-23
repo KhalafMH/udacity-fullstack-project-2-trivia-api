@@ -101,6 +101,38 @@ class TriviaTestCase(unittest.TestCase):
             "code": 404,
         }.items())
 
+    def test_create_question_creates_a_question(self):
+        client = self.client()
+        json = {
+            "question": "What is the answer",
+            "answer": "answer",
+            "category": "Science",
+            "difficulty": 5
+        }
+        result = client.post("/api/questions/new", json=json)
+        self.assertEqual(201, result.status_code)
+        self.assertDictEqual({"success": True}, result.json)
+        with self.app.app_context():
+            value = self.db.engine.execute(f"""
+                SELECT * FROM questions WHERE question='{json["question"]}' 
+                    AND answer='{json["answer"]}'
+                    AND category='Science'
+                    AND difficulty=5
+            """).first()
+            self.assertIsNotNone(value)
+
+    def test_create_question_fails_when_request_is_badly_formatted(self):
+        client = self.client()
+        json = {
+            "question": "What is the answer",
+            "answer": "answer",
+            "category": "Science",
+            "difficulty": 5
+        }
+        result = client.post("/api/questions/new", data=json)
+        self.assertEqual(400, result.status_code)
+        self.assertIn(("success", False), result.json.items())
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
