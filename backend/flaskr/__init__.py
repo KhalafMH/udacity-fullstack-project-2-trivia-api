@@ -26,6 +26,7 @@ def create_app(test_config=None):
         Returns all available categories.
         """
         return jsonify({
+            "success": True,
             "categories": _read_all_categories()
         })
 
@@ -40,6 +41,7 @@ def create_app(test_config=None):
         end = 10 * page
         page_questions = questions[start:end]
         result = {
+            "success": True,
             "questions": list(map(lambda x: _map_question(x), page_questions)),
             "total_questions": len(questions),
             "categories": _read_all_categories(),
@@ -56,7 +58,7 @@ def create_app(test_config=None):
             Question.query.filter_by(id=id).delete()
             db.session.commit()
             return jsonify({
-                "result": "success"
+                "success": True
             })
         except:
             db.session.rollback()
@@ -77,7 +79,7 @@ def create_app(test_config=None):
         db.session.add(question_object)
         db.session.commit()
         return jsonify({
-            "result": "success"
+            "success": True
         })
 
     @app.route('/api/questions', methods=['POST'])
@@ -88,6 +90,7 @@ def create_app(test_config=None):
         search_term = request.json['searchTerm']
         questions = Question.query.filter(Question.question.ilike(f"%{search_term}%")).all()
         return jsonify({
+            "success": True,
             "questions": list(map(lambda x: _map_question(x), questions)),
             "total_questions": len(questions),
             "current_category": None
@@ -100,6 +103,7 @@ def create_app(test_config=None):
         """
         questions_by_category = Question.query.filter(Question.category == id).all()
         return jsonify({
+            "success": True,
             "questions": list(map(lambda x: _map_question(x), questions_by_category)),
             "total_questions": len(questions_by_category),
             "current_category": _read_category(id),
@@ -126,6 +130,7 @@ def create_app(test_config=None):
             selection = int(random.random() * len(questions))
 
         return jsonify({
+            "success": True,
             "question": _map_question(questions[selection])
         })
 
