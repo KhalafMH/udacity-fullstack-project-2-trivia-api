@@ -78,6 +78,8 @@ def create_app(test_config=None):
         """
         Creates a new question
         """
+        if request.content_type != "application/json":
+            abort(400)
         question_text = request.json['question']
         answer = request.json['answer']
         difficulty = request.json['difficulty']
@@ -88,7 +90,7 @@ def create_app(test_config=None):
         db.session.commit()
         return jsonify({
             "success": True
-        })
+        }), 201
 
     @app.route('/api/questions', methods=['POST'])
     def search_questions():
