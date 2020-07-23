@@ -65,7 +65,7 @@ class TriviaTestCase(unittest.TestCase):
         }
         try:
             exists = next(q for q in result.json['questions'] if all(item in q.items() for item in question.items()))
-        except StopIteration as e:
+        except StopIteration:
             self.fail("Expected question was not found in the results")
         self.assertIsNotNone(exists)
 
@@ -79,22 +79,24 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_delete_question_succeeds(self):
         client = self.client()
-        id = 100
+        question_id = 100
         with self.app.app_context():
-            value = self.db.engine.execute(
-                f"INSERT INTO questions (id, question, answer, difficulty, category) VALUES ({id}, 'Question 100', 'Answer 100', 3, 1)")
+            value = self.db.engine.execute(f"""
+                INSERT INTO questions (id, question, answer, difficulty, category) 
+                VALUES ({question_id}, 'Question 100', 'Answer 100', 3, 1)
+            """)
             self.assertIsNotNone(value)
-        result = client.delete(f"/api/questions/{id}")
+        result = client.delete(f"/api/questions/{question_id}")
         self.assertEqual(200, result.status_code)
         self.assertEqual({"success": True}, result.json)
         with self.app.app_context():
-            value = self.db.engine.execute(f"SELECT * FROM questions WHERE id={id}").first()
+            value = self.db.engine.execute(f"SELECT * FROM questions WHERE id={question_id}").first()
             self.assertIsNone(value)
 
     def test_delete_question_fails_when_passed_nonexistent_id(self):
         client = self.client()
-        id = 500
-        result = client.delete(f"/api/questions/{id}")
+        question_id = 500
+        result = client.delete(f"/api/questions/{question_id}")
         self.assertEqual(404, result.status_code)
         all(self.assertIn(item, result.json.items()) for item in {
             "success": False,
