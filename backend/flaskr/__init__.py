@@ -134,6 +134,14 @@ def create_app(test_config=None):
             "question": _map_question(questions[selection])
         })
 
+    @app.errorhandler(400)
+    def handle_400(error):
+        return jsonify({
+            "success": False,
+            "error": error.description,
+            "code": error.code,
+        }), error.code
+
     @app.errorhandler(404)
     def handle_404(error):
         return jsonify({
