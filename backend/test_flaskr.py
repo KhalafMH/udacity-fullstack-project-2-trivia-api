@@ -24,14 +24,22 @@ class TriviaTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
             self.db.engine.execute("""
-                INSERT INTO categories (type) VALUES ('Science'), ('Sport')
+                INSERT INTO categories (id, type) VALUES (1, 'Science'), (2, 'Sport');
+            """)
+            self.db.engine.execute("""
+                INSERT INTO questions (id, question, answer, difficulty, category) 
+                VALUES (1, 'What is the answer to everything', '42', 3, 1);
+
+                INSERT INTO questions (id, question, answer, difficulty, category) 
+                VALUES (2, 'When did the big bang happen', 'When the universe was created', 3, 1);
             """)
 
     def tearDown(self):
         """Executed after reach test"""
         with self.app.app_context():
             self.db.engine.execute("""
-                DELETE FROM categories
+                DELETE FROM categories;
+                DELETE FROM questions;
             """)
         pass
 
@@ -47,6 +55,27 @@ class TriviaTestCase(unittest.TestCase):
         self.assertIn('Sport', result.json['categories'])
         self.assertIn('Science', result.json['categories'])
         self.assertEqual(2, len(result.json['categories']))
+
+    def test_get_questions_returns_correct_result(self):
+        client = self.client()
+        result = client.get("/api/questions?page=1")
+        self.assertEqual(200, result.status_code)
+        question = {
+            "id": 1,
+            "question": 'What is the answer to everything',
+            "answer": '42',
+            "difficulty": 3,
+            "category": 'Science',
+        }
+        self.assertIn(question, result.json['questions'])
+
+    def test_get_questions_fails_when_page_is_not_specified(self):
+        result = self.client().get('/api/questions')
+        self.assertEqual(400, result.status_code)
+        all(self.assertIn(item, result.json.items()) for item in {
+            "success": False,
+            "code": 400,
+        }.items())
 
 
 # Make the tests conveniently executable
