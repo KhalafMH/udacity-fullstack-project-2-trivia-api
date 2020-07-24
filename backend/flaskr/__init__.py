@@ -109,11 +109,11 @@ def create_app(test_config=None):
         })
 
     @app.route('/api/categories/<int:category_id>/questions')
-    def get_questions_by_category(category_id):
+    def get_questions_by_category(category_id: int):
         """
         Get all questions filtered by a category
         """
-        questions_by_category = Question.query.filter(Question.category == category_id).all()
+        questions_by_category = Question.query.filter(Question.category == str(category_id)).all()
         return jsonify({
             "success": True,
             "questions": list(map(lambda x: _map_question(x), questions_by_category)),
@@ -191,7 +191,7 @@ def _map_question(question):
     }
 
 
-def _read_category(category_id):
+def _read_category(category_id: int):
     current_category_object = Category.query.get(category_id)
     return current_category_object.type if current_category_object is not None else None
 
