@@ -135,6 +135,36 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(400, result.status_code)
         self.assertIn(("success", False), result.json.items())
 
+    def test_search_questions_returns_expected_results(self):
+        client = self.client()
+
+        result1 = client.post("/api/search/questions", json={"searchTerm": "the"})
+        self.assertEqual(200, result1.status_code)
+        self.assertEqual(2, len(result1.json["questions"]))
+
+        result2 = client.post("/api/search/questions", json={"searchTerm": "bang"})
+        self.assertEqual(200, result2.status_code)
+        self.assertEqual(1, len(result2.json["questions"]))
+        self.assertEqual("When did the big bang happen", result2.json["questions"][0]["question"])
+
+        result3 = client.post("/api/search/questions", json={"searchTerm": "BANG"})
+        self.assertEqual(200, result3.status_code)
+        self.assertEqual(1, len(result3.json["questions"]))
+        self.assertEqual("When did the big bang happen", result3.json["questions"][0]["question"])
+
+        result4 = client.post("/api/search/questions", json={"searchTerm": "NonexistentTerm"})
+        self.assertEqual(200, result4.status_code)
+        self.assertEqual(0, len(result4.json["questions"]))
+
+    def test_search_fails_when_no_search_term_is_provided(self):
+        client = self.client()
+
+        result1 = client.post("/api/search/questions", json={})
+        self.assertEqual(400, result1.status_code)
+
+        result2 = client.post("/api/search/questions", json={"searchTerm": ""})
+        self.assertEqual(400, result2.status_code)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
