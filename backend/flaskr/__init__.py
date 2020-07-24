@@ -113,6 +113,9 @@ def create_app(test_config=None):
         """
         Get all questions filtered by a category
         """
+        category = Category.query.get(category_id)
+        if category is None:
+            abort(400)
         questions_by_category = Question.query.filter(Question.category == str(category_id)).all()
         return jsonify({
             "success": True,
