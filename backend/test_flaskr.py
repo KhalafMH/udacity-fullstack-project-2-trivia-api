@@ -165,6 +165,36 @@ class TriviaTestCase(unittest.TestCase):
         result2 = client.post("/api/search/questions", json={"searchTerm": ""})
         self.assertEqual(400, result2.status_code)
 
+    def test_get_questions_by_category_returns_expected_questions(self):
+        client = self.client()
+        category_id_1 = 1
+        result1 = client.get(f"/api/categories/{category_id_1}/questions")
+        self.assertEqual(200, result1.status_code)
+        self.assertEqual('Science', result1.json['current_category'])
+        self.assertEqual(2, result1.json['total_questions'])
+        self.assertEqual(2, len(result1.json['questions']))
+        all(self.assertEqual('Science', question['category']) for question in result1.json['questions'])
+
+        category_id_2 = 2
+        result2 = client.get(f"/api/categories/{category_id_2}/questions")
+        self.assertEqual(200, result2.status_code)
+        self.assertEqual('Sport', result2.json['current_category'])
+        self.assertEqual(0, result2.json['total_questions'])
+        self.assertEqual(0, len(result2.json['questions']))
+
+    def test_get_questions_by_category_fails_when_category_is_given_by_name(self):
+        client = self.client()
+        category = 'Science'
+        result = client.get(f"/api/categories/{category}/questions")
+        self.assertEqual(404, result.status_code)
+
+    def test_get_questions_by_category_fails_when_passed_a_nonexistent_category_id(self):
+        client = self.client()
+        category_id = 1000
+        result = client.get(f"/api/categories/{category_id}/questions")
+        print(result.json)
+        self.assertEqual(400, result.status_code)
+
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
