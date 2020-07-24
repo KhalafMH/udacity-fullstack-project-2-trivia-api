@@ -1,4 +1,5 @@
 import random
+from re import search
 
 from flask import Flask, request, abort, jsonify
 from flask_cors import CORS
@@ -96,7 +97,9 @@ def create_app(test_config=None):
         """
         Returns case insensitive matches for a search term
         """
-        search_term = request.json['searchTerm']
+        search_term: str = request.json.get('searchTerm')
+        if search_term is None or search("^\\s*$", search_term) is not None:
+            abort(400)
         questions = Question.query.filter(Question.question.ilike(f"%{search_term}%")).all()
         return jsonify({
             "success": True,
