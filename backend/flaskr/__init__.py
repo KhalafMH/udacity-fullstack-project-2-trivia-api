@@ -139,10 +139,12 @@ def create_app(test_config=None):
             filtered_questions = list(filter(lambda x: x.category == category, questions))
         else:
             filtered_questions = questions
+        if len(filtered_questions) == 0 or len(filtered_questions) == len(previous_questions):
+            abort(404)
 
-        selection = int(random.random() * len(questions))
-        while questions[selection].id in previous_questions:
-            selection = int(random.random() * len(questions))
+        selection = int(random.random() * len(filtered_questions))
+        while filtered_questions[selection].id in previous_questions:
+            selection = int(random.random() * len(filtered_questions))
 
         return jsonify({
             "success": True,
