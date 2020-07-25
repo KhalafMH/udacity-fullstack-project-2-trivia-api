@@ -209,6 +209,7 @@ The API will return the following error types when requests fail:
 * Sample: `curl -X DELETE http://localhost:5000/api/questions/28`
 ```json
 {
+  "deleted_question_id": 28,
   "success": true
 }
 ```

@@ -66,7 +66,8 @@ def create_app(test_config=None):
             question.delete()
             db.session.commit()
             return jsonify({
-                "success": True
+                "success": True,
+                "deleted_question_id": question.id
             })
         except SQLAlchemyError:
             db.session.rollback()

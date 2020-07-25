@@ -85,7 +85,7 @@ class TriviaTestCase(unittest.TestCase):
             self.assertIsNotNone(value)
         result = client.delete(f"/api/questions/{question_id}")
         self.assertEqual(200, result.status_code)
-        self.assertEqual({"success": True}, result.json)
+        self.assertDictEqual({"success": True, "deleted_question_id": question_id}, result.json)
         with self.app.app_context():
             value = self.db.engine.execute(f"SELECT * FROM questions WHERE id={question_id}").first()
             self.assertIsNone(value)
