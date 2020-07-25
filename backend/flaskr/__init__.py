@@ -97,6 +97,8 @@ def create_app(test_config=None):
         """
         Returns case insensitive matches for a search term
         """
+        if request.content_type != "application/json":
+            abort(415)
         search_term: str = request.json.get('searchTerm')
         if search_term is None:
             abort(400)
@@ -133,8 +135,10 @@ def create_app(test_config=None):
         and return a random questions within the given category,
         if provided, and that is not one of the previous questions.
         """
-        previous_questions = request.json['previous_questions']
-        category = request.json['quiz_category']
+        if request.content_type != "application/json":
+            abort(415)
+        previous_questions: list[int] = request.json['previous_questions']
+        category: int = request.json['quiz_category']
 
         questions = Question.query.all()
         if category is not None:
@@ -142,7 +146,7 @@ def create_app(test_config=None):
         else:
             filtered_questions = questions
         if len(filtered_questions) == 0 or len(filtered_questions) == len(previous_questions):
-            abort(404)
+            abort(422)
 
         selection = int(random.random() * len(filtered_questions))
         while filtered_questions[selection].id in previous_questions:
@@ -214,3 +218,7 @@ def _read_category(category_id: int):
 def _read_all_categories():
     categories = Category.query.all()
     return list(map(lambda x: x.type, categories))
+
+
+if __name__ == '__main__':
+    Flask.run(create_app())
