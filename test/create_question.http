@@ -1,4 +1,4 @@
-POST http://localhost:5000/api/questions/new
+POST http://localhost:5000/api/questions
 Content-Type: application/json
 
 {

@@ -1,4 +1,4 @@
-POST localhost:5000/api/questions
+POST localhost:5000/api/search/questions
 Content-Type: application/json
 
 {
