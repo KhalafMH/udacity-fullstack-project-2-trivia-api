@@ -162,8 +162,8 @@ class TriviaTestCase(unittest.TestCase):
         result1 = client.post("/api/search/questions", json={})
         self.assertEqual(400, result1.status_code)
 
-        result2 = client.post("/api/search/questions", json={"searchTerm": ""})
-        self.assertEqual(400, result2.status_code)
+        result2 = client.post("/api/search/questions", json={"searchTerm": " "})
+        self.assertEqual(422, result2.status_code)
 
     def test_get_questions_by_category_returns_expected_questions(self):
         client = self.client()

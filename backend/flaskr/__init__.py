@@ -98,8 +98,10 @@ def create_app(test_config=None):
         Returns case insensitive matches for a search term
         """
         search_term: str = request.json.get('searchTerm')
-        if search_term is None or search("^\\s*$", search_term) is not None:
+        if search_term is None:
             abort(400)
+        if search("^\\s*$", search_term) is not None:
+            abort(422)
         questions = Question.query.filter(Question.question.ilike(f"%{search_term}%")).all()
         return jsonify({
             "success": True,
