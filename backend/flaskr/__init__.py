@@ -138,7 +138,7 @@ def create_app(test_config=None):
         if request.content_type != "application/json":
             abort(415)
         previous_questions: list[int] = request.json['previous_questions']
-        category: str = request.json['quiz_category']['type']
+        category: str = request.json['quiz_category']
 
         category_id: int = Category.query.filter(Category.type == category).all()[0].id
         questions = Question.query.all()

@@ -203,8 +203,7 @@ class TriviaTestCase(unittest.TestCase):
         client = self.client()
 
         for i in range(10):
-            result = client.post("/api/quizzes",
-                                 json=dict(previous_questions=[], quiz_category={"type": "Sport", "id": 2}))
+            result = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category="Sport"))
             self.assertEqual(200, result.status_code)
             self.assertEqual("Sport", result.json['question']['category'])
 
@@ -214,7 +213,6 @@ class TriviaTestCase(unittest.TestCase):
         quiz_category_1 = "Science"
         quiz_category_1_id = 1
         quiz_category_2 = "History"
-        quiz_category_2_id = "History"
         with self.app.app_context():
             query = self.db.engine.execute(f"""
                 SELECT * FROM questions WHERE category = {quiz_category_1_id}
@@ -222,12 +220,10 @@ class TriviaTestCase(unittest.TestCase):
             previous_questions = [q.id for q in query]
 
         result1 = client.post("/api/quizzes",
-                              json=dict(previous_questions=previous_questions,
-                                        quiz_category={"type": quiz_category_1, "id": quiz_category_1_id}))
+                              json=dict(previous_questions=previous_questions, quiz_category=quiz_category_1))
         self.assertEqual(422, result1.status_code)
 
-        result2 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category={"type": quiz_category_2,
-                                                                                              "id": quiz_category_2_id}))
+        result2 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=quiz_category_2))
         self.assertEqual(422, result2.status_code)
 
 
