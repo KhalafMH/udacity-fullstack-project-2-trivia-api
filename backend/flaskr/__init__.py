@@ -79,7 +79,7 @@ def create_app(test_config=None):
         Creates a new question
         """
         if request.content_type != "application/json":
-            abort(400)
+            abort(415)
         question_text = request.json['question']
         answer = request.json['answer']
         difficulty = request.json['difficulty']
@@ -163,6 +163,14 @@ def create_app(test_config=None):
 
     @app.errorhandler(404)
     def handle_404(error):
+        return jsonify({
+            "success": False,
+            "error": error.description,
+            "code": error.code,
+        }), error.code
+
+    @app.errorhandler(415)
+    def handle_415(error):
         return jsonify({
             "success": False,
             "error": error.description,
