@@ -43,11 +43,6 @@ class TriviaTestCase(unittest.TestCase):
             self.db.engine.execute("DELETE FROM questions")
             self.db.engine.execute("DELETE FROM categories")
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
-
     def test_get_categories_returns_correct_result(self):
         client = self.client()
         result = client.get("/api/categories")
