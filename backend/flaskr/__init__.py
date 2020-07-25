@@ -105,7 +105,8 @@ def create_app(test_config=None):
             abort(400)
         if search("^\\s*$", search_term) is not None:
             abort(422)
-        questions = Question.query.filter(Question.question.ilike(f"%{search_term}%")).all()
+        questions = Question.query.filter(
+            Question.question.ilike(f"%{search_term}%")).all()
         return jsonify({
             "success": True,
             "questions": list(map(lambda x: _map_question(x), questions)),
@@ -121,10 +122,12 @@ def create_app(test_config=None):
         category = Category.query.get(category_id)
         if category is None:
             abort(400)
-        questions_by_category = Question.query.filter(Question.category == str(category_id)).all()
+        questions_by_category = Question.query.filter(
+            Question.category == str(category_id)).all()
         return jsonify({
             "success": True,
-            "questions": list(map(lambda x: _map_question(x), questions_by_category)),
+            "questions": list(
+                map(lambda x: _map_question(x), questions_by_category)),
             "total_questions": len(questions_by_category),
             "current_category": _read_category(category_id),
         })
@@ -141,16 +144,19 @@ def create_app(test_config=None):
         previous_questions: list[int] = request.json['previous_questions']
         category: str = request.json['quiz_category']
 
-        filtered_category: list[Category] = Category.query.filter(Category.type == category).all()
+        filtered_category: list[Category] = Category.query.filter(
+            Category.type == category).all()
         category_id: int or None = filtered_category[0].id \
             if filtered_category is not None and len(filtered_category) > 0 \
             else None
         questions = Question.query.all()
         if category_id is not None:
-            filtered_questions = list(filter(lambda x: x.category == category_id, questions))
+            filtered_questions = list(
+                filter(lambda x: x.category == category_id, questions))
         else:
             filtered_questions = questions
-        if len(filtered_questions) == 0 or len(filtered_questions) == len(previous_questions):
+        if len(filtered_questions) == 0 or len(filtered_questions) == len(
+                previous_questions):
             abort(422)
 
         selection = int(random.random() * len(filtered_questions))
@@ -217,7 +223,9 @@ def _map_question(question):
 
 def _read_category(category_id: int):
     current_category_object = Category.query.get(category_id)
-    return current_category_object.type if current_category_object is not None else None
+    return current_category_object.type \
+        if current_category_object is not None \
+        else None
 
 
 def _read_all_categories():
