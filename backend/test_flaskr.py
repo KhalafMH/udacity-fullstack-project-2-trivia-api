@@ -1,7 +1,5 @@
 import unittest
 
-from flask_sqlalchemy import SQLAlchemy
-
 from flaskr import create_app
 from models import setup_db
 
@@ -15,13 +13,15 @@ class TriviaTestCase(unittest.TestCase):
         self.client = self.app.test_client
         self.database_name = "trivia_test"
         self.database_path = "postgres://{}/{}".format('postgres:password@localhost:5432', self.database_name)
-        setup_db(self.app, self.database_path)
+        self.db = setup_db(self.app, self.database_path)
 
         # binds the app to the current context
         with self.app.app_context():
-            self.db = SQLAlchemy()
-            self.db.init_app(self.app)
             # create all tables
+            self.db.engine.execute("""
+                DROP TABLE IF EXISTS questions;
+                DROP TABLE IF EXISTS categories;
+            """)
             self.db.create_all()
             self.db.engine.execute("""
                 INSERT INTO categories (id, type) VALUES (1, 'Science'), (2, 'Sport'), (3, 'History');
@@ -39,9 +39,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def tearDown(self):
         """Executed after each test"""
-        with self.app.app_context():
-            self.db.engine.execute("DELETE FROM questions")
-            self.db.engine.execute("DELETE FROM categories")
+        pass
 
     def test_get_categories_returns_correct_result(self):
         client = self.client()
