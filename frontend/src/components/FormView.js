@@ -92,7 +92,7 @@ class FormView extends Component {
                 {Object.keys(this.state.categories).map(id => {
                   return (
                       <option key={id}
-                              value={id}>{this.state.categories[id]}</option>
+                              value={parseInt(id)+1}>{this.state.categories[id]}</option>
                   );
                 })}
               </select>
