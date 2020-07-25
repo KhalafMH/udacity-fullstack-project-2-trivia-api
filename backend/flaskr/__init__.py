@@ -138,11 +138,12 @@ def create_app(test_config=None):
         if request.content_type != "application/json":
             abort(415)
         previous_questions: list[int] = request.json['previous_questions']
-        category: int = request.json['quiz_category']
+        category: str = request.json['quiz_category']['type']
 
+        category_id: int = Category.query.filter(Category.type == category).all()[0].id
         questions = Question.query.all()
-        if category is not None:
-            filtered_questions = list(filter(lambda x: x.category == category, questions))
+        if category_id is not None:
+            filtered_questions = list(filter(lambda x: x.category == category_id, questions))
         else:
             filtered_questions = questions
         if len(filtered_questions) == 0 or len(filtered_questions) == len(previous_questions):
