@@ -157,7 +157,9 @@ def create_app(test_config=None):
             filtered_questions = questions
         if len(filtered_questions) == 0 or len(filtered_questions) == len(
                 previous_questions):
-            abort(422)
+            return jsonify({
+                "success": True
+            })
 
         selection = int(random.random() * len(filtered_questions))
         while filtered_questions[selection].id in previous_questions:

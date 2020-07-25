@@ -196,28 +196,40 @@ class TriviaTestCase(unittest.TestCase):
         client = self.client()
 
         for i in range(10):
-            result = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category="Sport"))
+            result = client.post("/api/quizzes",
+                                 json=dict(previous_questions=[],
+                                           quiz_category="Sport"))
             self.assertEqual(200, result.status_code)
             self.assertEqual("Sport", result.json['question']['category'])
 
-    def test_get_quiz_question_fails_when_there_are_no_remaining_questions(self):
+    def test_get_quiz_question_succeeds_when_questions_in_category_are_exhausted(
+            self):
         client = self.client()
 
-        quiz_category_1 = "Science"
-        quiz_category_1_id = 1
-        quiz_category_2 = "History"
+        quiz_category = "Science"
+        quiz_category_id = 1
+
+        previous_questions: list[int]
         with self.app.app_context():
             query = self.db.engine.execute(f"""
-                SELECT * FROM questions WHERE category = {quiz_category_1_id}
+                SELECT * FROM questions WHERE category = {quiz_category_id}
             """)
             previous_questions = [q.id for q in query]
 
-        result1 = client.post("/api/quizzes",
-                              json=dict(previous_questions=previous_questions, quiz_category=quiz_category_1))
-        self.assertEqual(422, result1.status_code)
+        result = client.post("/api/quizzes",
+                             json=dict(previous_questions=previous_questions,
+                                       quiz_category=quiz_category))
+        self.assertEqual(200, result.status_code)
+        self.assertDictEqual({"success": True}, result.json)
 
-        result2 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=quiz_category_2))
-        self.assertEqual(422, result2.status_code)
+
+def test_get_quiz_question_fails_when_there_are_no_questions_in_category(
+        self):
+    client = self.client()
+    quiz_category = "History"
+    result = client.post("/api/quizzes", json=dict(previous_questions=[],
+                                                   quiz_category=quiz_category))
+    self.assertEqual(422, result.status_code)
 
 
 # Make the tests conveniently executable
