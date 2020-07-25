@@ -24,7 +24,7 @@ class TriviaTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
             self.db.engine.execute("""
-                INSERT INTO categories (id, type) VALUES (1, 'Science'), (2, 'Sport');
+                INSERT INTO categories (id, type) VALUES (1, 'Science'), (2, 'Sport'), (3, 'History');
             """)
             self.db.engine.execute("""
                 INSERT INTO questions (question, answer, difficulty, category) 
@@ -32,6 +32,9 @@ class TriviaTestCase(unittest.TestCase):
 
                 INSERT INTO questions (question, answer, difficulty, category) 
                 VALUES ('When did the big bang happen', 'When the universe was created', 3, 1);
+                
+                INSERT INTO questions (question, answer, difficulty, category) 
+                VALUES ('Sport question', 'Sport answer', 5, 2);
             """)
 
     def tearDown(self):
@@ -51,7 +54,8 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(200, result.status_code)
         self.assertIn('Sport', result.json['categories'])
         self.assertIn('Science', result.json['categories'])
-        self.assertEqual(2, len(result.json['categories']))
+        self.assertIn('History', result.json['categories'])
+        self.assertEqual(3, len(result.json['categories']))
 
     def test_get_questions_returns_correct_result(self):
         client = self.client()
@@ -179,8 +183,8 @@ class TriviaTestCase(unittest.TestCase):
         result2 = client.get(f"/api/categories/{category_id_2}/questions")
         self.assertEqual(200, result2.status_code)
         self.assertEqual('Sport', result2.json['current_category'])
-        self.assertEqual(0, result2.json['total_questions'])
-        self.assertEqual(0, len(result2.json['questions']))
+        self.assertEqual(1, result2.json['total_questions'])
+        self.assertEqual(1, len(result2.json['questions']))
 
     def test_get_questions_by_category_fails_when_category_is_given_by_name(self):
         client = self.client()
@@ -198,9 +202,10 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_quiz_question_returns_a_question_in_the_specified_category(self):
         client = self.client()
 
-        result1 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=1))
-        self.assertEqual(200, result1.status_code)
-        self.assertEqual("Science", result1.json['question']['category'])
+        for i in range(10):
+            result = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=2))
+            self.assertEqual(200, result.status_code)
+            self.assertEqual("Sport", result.json['question']['category'])
 
     def test_get_quiz_question_fails_when_there_are_no_remaining_questions(self):
         client = self.client()
@@ -215,7 +220,7 @@ class TriviaTestCase(unittest.TestCase):
         result1 = client.post("/api/quizzes", json=dict(previous_questions=previous_questions, quiz_category=1))
         self.assertEqual(422, result1.status_code)
 
-        result2 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=2))
+        result2 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=3))
         self.assertEqual(422, result2.status_code)
 
 

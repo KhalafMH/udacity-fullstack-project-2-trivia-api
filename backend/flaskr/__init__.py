@@ -154,7 +154,7 @@ def create_app(test_config=None):
 
         return jsonify({
             "success": True,
-            "question": _map_question(questions[selection])
+            "question": _map_question(filtered_questions[selection])
         })
 
     @app.errorhandler(400)
