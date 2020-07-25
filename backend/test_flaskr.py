@@ -3,7 +3,7 @@ import unittest
 from flask_sqlalchemy import SQLAlchemy
 
 from flaskr import create_app
-from models import setup_db, Question
+from models import setup_db
 
 
 class TriviaTestCase(unittest.TestCase):
@@ -205,22 +205,18 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_quiz_question_fails_when_there_are_no_remaining_questions(self):
         client = self.client()
 
-        result1 = client.post("/api/quizzes", json=dict(previous_questions=[
-            Question(
-                question="What is the answer to everything",
-                answer="42",
-                category="Science",
-                difficulty=3).format(),
-            Question(
-                question="When did the big bang happen",
-                answer="When the universe was created",
-                category="Science",
-                difficulty=3).format(),
-        ], quiz_category="1"))
-        self.assertEqual(404, result1.status_code)
+        quiz_category = 1
+        with self.app.app_context():
+            query = self.db.engine.execute(f"""
+                SELECT * FROM questions WHERE category = '{quiz_category}'
+            """)
+            previous_questions = [q.id for q in query]
 
-        result2 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category="2"))
-        self.assertEqual(404, result2.status_code)
+        result1 = client.post("/api/quizzes", json=dict(previous_questions=previous_questions, quiz_category=1))
+        self.assertEqual(422, result1.status_code)
+
+        result2 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=2))
+        self.assertEqual(422, result2.status_code)
 
 
 # Make the tests conveniently executable
