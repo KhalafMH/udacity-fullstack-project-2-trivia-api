@@ -140,7 +140,10 @@ def create_app(test_config=None):
         previous_questions: list[int] = request.json['previous_questions']
         category: str = request.json['quiz_category']
 
-        category_id: int = Category.query.filter(Category.type == category).all()[0].id
+        filtered_category: list[Category] = Category.query.filter(Category.type == category).all()
+        category_id: int or None = filtered_category[0].id \
+            if filtered_category is not None and len(filtered_category) > 0 \
+            else None
         questions = Question.query.all()
         if category_id is not None:
             filtered_questions = list(filter(lambda x: x.category == category_id, questions))
