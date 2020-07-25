@@ -108,7 +108,7 @@ class TriviaTestCase(unittest.TestCase):
         json = {
             "question": "What is the answer",
             "answer": "answer",
-            "category": "Science",
+            "category": 1,
             "difficulty": 5
         }
         result = client.post("/api/questions", json=json)
@@ -118,7 +118,7 @@ class TriviaTestCase(unittest.TestCase):
             value = self.db.engine.execute(f"""
                 SELECT * FROM questions WHERE question='{json["question"]}' 
                     AND answer='{json["answer"]}'
-                    AND category='Science'
+                    AND category=1
                     AND difficulty=5
             """).first()
             self.assertIsNotNone(value)
@@ -198,7 +198,7 @@ class TriviaTestCase(unittest.TestCase):
     def test_get_quiz_question_returns_a_question_in_the_specified_category(self):
         client = self.client()
 
-        result1 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category="1"))
+        result1 = client.post("/api/quizzes", json=dict(previous_questions=[], quiz_category=1))
         self.assertEqual(200, result1.status_code)
         self.assertEqual("Science", result1.json['question']['category'])
 
